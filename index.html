@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A3D: Adaptive Affordance Assembly with Dual-Arm Manipulation</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Video display area styles */
+        .video-display-area {
+            max-width: 900px;
+            margin: 0 auto 30px auto;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            aspect-ratio: 16 / 9;
+        }
+        
+        .video-display-area video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .video-nav-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .video-nav-btn {
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            color: #555;
+        }
+
+        .video-nav-btn:hover {
+            background-color: #e0e0e0;
+            border-color: #ccc;
+        }
+
+        .video-nav-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .adaptation-desc {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        /* Teaser Video Centered */
+        .teaser-video-center {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .teaser-video-center video {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Abstract with Figure - Side by Side */
+        .abstract-with-figure {
+            display: flex;
+            gap: 50px;
+            align-items: stretch;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .abstract-with-figure .abstract-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 1.05rem;
+        }
+
+        .abstract-with-figure .abstract-figure {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .abstract-with-figure .abstract-figure img {
+            width: 100%;
+            max-width: 550px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 1000px) {
+            .abstract-with-figure {
+                flex-direction: column;
+                align-items: center;
+                gap: 30px;
+            }
+            .abstract-with-figure .abstract-figure img {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">A3D</a>
+            <ul class="nav-links">
+                <li><a href="#abstract">Abstract</a></li>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#method">Method</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#real-world">Real-World</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <div class="venue-badge">
+                <span class="venue-icon">🎉</span>
+                <span><strong>AAAI 2026 Oral</strong></span>
+            </div>
+            <h1 class="title">
+                <span class="title-highlight">A3D</span>: <span class="title-letter">A</span>daptive <span class="title-letter">A</span>ffordance <span class="title-letter">A</span>ssembly with <span class="title-letter">D</span>ual-Arm Manipulation
+            </h1>
+            
+            <div class="authors-container">
+                <div class="authors-row">
+                    <div class="author"><span class="author-name">Jiaqi Liang</span><sup class="sup-equal">*</sup></div>
+                    <div class="author"><a href="https://yuechen0614.github.io/" target="_blank" class="author-name">Yue Chen</a><sup class="sup-equal">*</sup></div>
+                    <div class="author"><span class="author-name">Qize Yu</span><sup class="sup-equal">*</sup></div>
+                </div>
+                <div class="authors-row">
+                    <div class="author"><a href="https://sxy7147.github.io/" target="_blank" class="author-name">Yan Shen</a></div>
+                    <div class="author"><span class="author-name">Haipeng Zhang</span></div>
+                    <div class="author"><a href="https://zsdonghao.github.io/" target="_blank" class="author-name">Hao Dong</a></div>
+                    <div class="author"><a href="https://warshallrho.github.io/" target="_blank" class="author-name">Ruihai Wu</a><sup class="sup-corresponding">†</sup></div>
+                </div>
+            </div>
+            
+            <div class="affiliations">
+                <p>Peking University</p>
+                <p class="equal-contrib">* Equal contribution &nbsp;&nbsp; † Corresponding author</p>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="#" class="btn btn-primary"><i class="fas fa-file-pdf"></i><span>Paper</span></a>
+                <a href="https://github.com/SCreatorX/Adaptive-Affordance-Assembly-with-Dual-Arm-Manipulation" class="btn btn-secondary"><i class="fab fa-github"></i><span>Code</span></a>
+            </div>
+        </div>
+    </header>
+
+    <section class="teaser">
+        <div class="container">
+            <div class="teaser-video-center">
+                <video controls autoplay loop muted playsinline class="teaser-video">
+                    <source src="src/video/Video.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+    </section>
+
+    <section id="abstract" class="section">
+        <div class="container">
+            <h2 class="section-title">Abstract</h2>
+            <div class="abstract-with-figure">
+                <div class="abstract-content">
+                    <p>
+                        Furniture assembly is a crucial yet challenging task for robots, requiring precise dual-arm coordination where one arm manipulates parts while the other provides collaborative support and stabilization. To accomplish this task more effectively, robots need to actively adapt support strategies throughout the long-horizon assembly process, while also generalizing across diverse part geometries.
+                    </p>
+                    <p>
+                        We propose <strong>A3D</strong>, a framework which learns adaptive affordances to identify optimal support and stabilization locations on furniture parts. The method employs dense point-level geometric representations to model part interaction patterns, enabling generalization across varied geometries. To handle evolving assembly states, we introduce an adaptive module that uses interaction feedback to dynamically adjust support strategies during assembly based on previous interactions. We establish a simulation environment featuring 50 diverse parts across 8 furniture types, designed for dual-arm collaboration evaluation. Experiments demonstrate that our framework generalizes effectively to diverse part geometries and furniture categories in both simulation and real-world settings.
+                    </p>
+                </div>
+                <div class="abstract-figure">
+                    <img src="src/image/TeaserV2.png" alt="Comparison of Single Arm vs Dual Arm Assembly">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="overview" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Overview</h2>
+            
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="pipeline">Pipeline</button>
+                    <button class="tab-btn" data-tab="architecture">Architecture</button>
+                </div>
+                
+                <div class="tab-content">
+                    <div id="pipeline" class="tab-panel active">
+                        <div class="overview-image">
+                            <div class="image-placeholder">
+                                <img src="src/image/PipelineV6.png" alt="Framework Overview" style="width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="architecture" class="tab-panel">
+                        <div class="overview-image">
+                            <div class="image-placeholder">
+                                <img src="src/image/FrameworkV11.png" alt="Network Architecture" style="width: 100%;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="method" class="section">
+        <div class="container">
+            <h2 class="section-title">Method</h2>
+            
+            <div class="method-grid">
+                 <div class="method-card">
+                    <div class="method-icon"><i class="fas fa-brain"></i></div>
+                    <h3>Feature Extraction</h3>
+                    <p>PointNet++ extracts dense geometric features. Operation points are encoded to guide support estimation.</p>
+                </div>
+                <div class="method-card">
+                    <div class="method-icon"><i class="fas fa-cogs"></i></div>
+                    <h3>Affordance & Proposal</h3>
+                    <p>Predicts Top-K support points and uses CVAE to generate feasible orientations.</p>
+                </div>
+                <div class="method-card">
+                    <div class="method-icon"><i class="fas fa-magic"></i></div>
+                    <h3>Interaction Adaptation</h3>
+                    <p>Aggregates historical feedback (actions & movements) to refine predictions.</p>
+                </div>
+            </div>
+            
+            <div class="method-details">
+                <h3 class="subsection-title">Key Technical Details</h3>
+                <div class="method-row">
+                    <div class="method-text">
+                        <p>Our method learns a closed-loop adaptive policy <strong>π(u<sub>t</sub> | S<sub>t</sub>, I<sub>t</sub>)</strong>. The core innovation lies in the <strong>Interaction Context Adaptation Module</strong>.</p>
+                        <p><strong>Top-K Sampling Strategy:</strong> Instead of relying on a single deterministic output, we employ Top-K sampling to propose diverse candidate support points, avoiding local optima like unstable corners.</p>
+                        <p><strong>Interaction Context Encoding:</strong> When a support action fails, we record the tuple <em>(Point Cloud, Action, Displacement)</em>. [cite_start]An Attention mechanism aggregates these historical contexts to dynamically adjust the affordance heatmap[cite: 7].</p>
+                    </div>
+                    <div class="method-figure">
+                        <div class="image-placeholder">
+                            <img src="src/image/7.png" alt="Simulation Assets" style="width: 100%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="results" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Results</h2>
+
+            <div class="comparison-section">
+                <h3 class="subsection-title">Quantitative Evaluation</h3>
+                <div class="table-wrapper">
+                     <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Screw ↑</th>
+                                <th>Push ↑</th>
+                                <th>Pull ↑</th>
+                                <th>Pick Up ↑</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Random</td><td>9.0%</td><td>7.2%</td><td>4.0%</td><td>6.5%</td></tr>
+                            <tr><td>Heuristic</td><td>46.7%</td><td>31.9%</td><td>52.8%</td><td>31.4%</td></tr>
+                            <tr><td>DP3</td><td>17.4%</td><td>22.1%</td><td>10.1%</td><td>11.5%</td></tr>
+                             <tr><td>LLM-Guided</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td></tr>
+                            <tr class="highlight"><td><strong>A3D (Ours)</strong></td><td><strong>56.3%</strong></td><td><strong>67.9%</strong></td><td><strong>61.7%</strong></td><td><strong>47.1%</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="qualitative-section">
+                <h3 class="subsection-title">Qualitative Analysis & Ablations</h3>
+                <div class="figure-block">
+                    <h4>Visual Affordance Adaptation</h4>
+                    <div class="image-placeholder">
+                        <img src="src/image/Affordance with InteractionV7.png" alt="Affordance Map Visualization" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="figure-block" style="margin-top: 60px;">
+                    <h4 style="margin-bottom: 30px;">Ablation Study</h4>
+                    <div class="image-placeholder">
+                        <img src="src/image/Ablation StudyV10.png" alt="Ablation Qualitative Analysis" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sim-videos" class="section">
+        <div class="container">
+            <h2 class="section-title">Simulation Demonstrations</h2>
+            
+            <!-- Desk Full Multi-View -->
+            <h3 class="subsection-title">Desk Assembly (Multi-View)</h3>
+            <div class="video-nav-container">
+                <button class="video-nav-btn active" onclick="changeDeskVideo('front')">Front</button>
+                <button class="video-nav-btn" onclick="changeDeskVideo('back')">Back</button>
+                <button class="video-nav-btn" onclick="changeDeskVideo('left')">Left</button>
+                <button class="video-nav-btn" onclick="changeDeskVideo('right')">Right</button>
+            </div>
+            <div class="video-display-area">
+                <video id="desk-main-video" controls playsinline src="src/video/desk_full/front_video.mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+
+            <!-- Lamp Multi-View -->
+            <h3 class="subsection-title" style="margin-top: 50px;">Lamp Assembly (Multi-View)</h3>
+            <div class="video-nav-container">
+                <button class="video-nav-btn active" onclick="changeLampVideo('front')">Front</button>
+                <button class="video-nav-btn" onclick="changeLampVideo('back')">Back</button>
+                <button class="video-nav-btn" onclick="changeLampVideo('left')">Left</button>
+                <button class="video-nav-btn" onclick="changeLampVideo('right')">Right</button>
+            </div>
+            <div class="video-display-area">
+                <video id="lamp-main-video" controls playsinline src="src/video/lamp/front_video.mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+    </section>
+
+    <section id="real-world" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Real-World Experiments</h2>
+            
+            <div class="figure-container" style="margin-bottom: 40px;">
+                <div class="image-placeholder">
+                    <img src="src/image/RealV4.png" alt="Real World Experiments" style="width: 100%;">
+                </div>
+            </div>
+
+            <div class="video-block" style="margin-bottom: 60px;">
+                <h3 class="subsection-title">Spotlight: Adaptive Correction in Action</h3>
+                <div class="video-display-area">
+                    <video controls playsinline src="src/video/ada_Desk.MP4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">Full Procedure Demonstrations</h3>
+            
+            <div class="video-nav-container">
+                <button class="video-nav-btn active" onclick="changeRealVideo('screw_desk')">Screw Desk</button>
+                <button class="video-nav-btn" onclick="changeRealVideo('screw_lamp')">Screw Lamp</button>
+                <button class="video-nav-btn" onclick="changeRealVideo('push_drawer')">Push Drawer</button>
+                <button class="video-nav-btn" onclick="changeRealVideo('push_cabinet')">Push Cabinet</button>
+            </div>
+
+            <div class="video-display-area">
+                <video id="real-main-video" controls playsinline src="src/video/Desk.MP4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+    </section>
+
+    <section id="bibtex" class="section">
+        <div class="container">
+            <h2 class="section-title">BibTeX</h2>
+            <div class="bibtex-container">
+                <pre class="bibtex-code"><code>@inproceedings{
+}</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 Peking University.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching for Overview section
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                const container = this.closest('.tab-container');
+                
+                // Update buttons
+                container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update panels
+                container.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                container.querySelector('#' + tabId).classList.add('active');
+            });
+        });
+
+        // Desk Multi-View Video Data
+        const deskVideos = {
+            'front': 'src/video/desk_full/front_video.mp4',
+            'back': 'src/video/desk_full/back_video.mp4',
+            'left': 'src/video/desk_full/left_video.mp4',
+            'right': 'src/video/desk_full/right_video.mp4'
+        };
+
+        // Lamp Multi-View Video Data
+        const lampVideos = {
+            'front': 'src/video/lamp/front_video.mp4',
+            'back': 'src/video/lamp/back_video.mp4',
+            'left': 'src/video/lamp/left_video.mp4',
+            'right': 'src/video/lamp/right_video.mp4'
+        };
+
+        // Real World Video Data
+        const realVideos = {
+            'screw_desk': 'src/video/Desk.MP4',
+            'screw_lamp': 'src/video/Lamp.MP4',
+            'push_drawer': 'src/video/Drawer.MP4',
+            'push_cabinet': 'src/video/Cabinet.MP4'
+        };
+
+        function changeDeskVideo(view) {
+            const video = document.getElementById('desk-main-video');
+            video.src = deskVideos[view];
+
+            // Update button styles
+            event.target.parentElement.querySelectorAll('.video-nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function changeLampVideo(view) {
+            const video = document.getElementById('lamp-main-video');
+            video.src = lampVideos[view];
+
+            // Update button styles
+            event.target.parentElement.querySelectorAll('.video-nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function changeRealVideo(key) {
+            const video = document.getElementById('real-main-video');
+            video.src = realVideos[key];
+
+            // Update button styles
+            event.target.parentElement.querySelectorAll('.video-nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
